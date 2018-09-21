@@ -1,0 +1,19 @@
+{
+  "name": "smart_pill_dock",
+  "version": "1.0.0",
+  "description": "A node.js backend server to support smart pill bottle dock hardware based on ESP32. ",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nyinyinyanlin/smart-pill-bottle-dock.git"
+  },
+  "author": "Nyi Nyi Nyan Lin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nyinyinyanlin/smart-pill-bottle-dock/issues"
+  },
+  "homepage": "https://github.com/nyinyinyanlin/smart-pill-bottle-dock#readme"
+}
