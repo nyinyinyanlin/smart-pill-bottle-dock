@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="/styles/bootstrap/bootstrap.min.css"></link>
+  <style>
+  </style>
+  <title>Smart Pill Bottle Dock</title>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col">
+        <div class="h1 mt-2">Smart Pill Bottle Station - Dashboard</div>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col">
+          <div class="form-group">
+            <label for="slot1weight">Slot 1</label>
+            <input type="number" class="form-control" id="slot1weight" name="1" aria-describedby="slot1help"></input>
+            <button class="btn btn-success form-control mt-1 set-btn">Set</button>
+            <small id="slot1help" class="form-text text-muted">Weight of each tablet or pill inside bottle of slot 1 in milligram.</small>
+          </div>
+      </div>
+      <div class="col">
+          <div class="form-group">
+            <label for="slot2weight">Slot 2</label>
+            <input type="number" class="form-control" id="slot2weight" name="2" aria-describedby="slot2help"></input>
+            <button class="btn btn-success form-control mt-1 set-btn">Set</button>
+            <small id="slot2help" class="form-text text-muted">Weight of each tablet or pill inside bottle of slot 2 in milligram.</small>
+          </div>
+      </div>
+      <div class="col">
+          <div class="form-group">
+            <label for="slot3weight">Slot 3</label>
+            <input type="number" class="form-control" id="slot3weight" name="3" aria-describedby="slot3help"></input>
+            <button class="btn btn-success form-control mt-1 set-btn">Set</button>
+            <small id="slot3help" class="form-text text-muted">Weight of each tablet or pill inside bottle of slot 3 in milligram.</small>
+          </div>
+      </div>
+    </div>
+    <hr>
+    <div class="row mt-4">
+      <div class="col col-4">
+        <form>
+          <div class="form-group">
+            <label for="slotSelect">Target Slot</label>
+            <select id="slotSelect" class="form-control">
+              <option value="1" selected>Slot 1</option>
+              <option value="2">Slot 2</option>
+              <option value="3">Slot 3</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="timeInput">Schedule HH:MM AM/PM</label>
+            <input type="time" class="form-control" id="timeInput" aria-describedby="timeHelp"></input>
+            <small id="timeHelp" class="form-text text-muted">This scheduled task will be carried out daily.</small>
+          </div>
+          <div class="form-group">
+            <label for="pillInput">Number of Pills to Take</label>
+            <input type="number" class="form-control" id="pillInput" min="0" max="10" step="1"></input>
+          </div>
+          <button class="btn btn-success form-control" id="taskInsert">Insert</button>
+          <!--
+          Column element to host pill schedule insert element.
+        -->
+      </div>
+      <div class="col" style="overflow:auto;height:320px">
+        <div class="h3">Schedules</div>
+        <!--
+        Column element to show scheduled pill takes from database table.
+        Must be scrollable
+      -->
+      <!-- Table Format -->
+      <!-- Slot Number | Numebr of Pills | Time of Day | Remove Button-->
+      <table class="table table-striped" id="scheduleTable">
+        <form id="schedulesForm">
+        <thead>
+          <tr>
+            <th scope="col">Slot Number</th>
+            <th scope="col">Time of Day</th>
+            <th scope="col">Number of Pills</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody id="scheduleTableBody">
+        </tbody>
+      </form>
+      </table>
+    </div>
+  </div>
+  <hr>
+  <div class="row mt-4">
+    <div class="col" style="overflow:auto">
+      <div class="h3">Event History</div>
+      <!--
+      Column element to show event history from database table.
+      Must be scrollable
+    -->
+    <!-- Date | Time of Day | Slot Number | Event Description -->
+    <table class="table table-striped table-dark" id="historyTable">
+      <thead>
+        <tr>
+          <th scope="col">Date</th>
+          <th scope="col">Time of Day</th>
+          <th scope="col">Slot Number</th>
+          <th scope="col">Event Description</th>
+        </tr>
+      </thead>
+      <tbody id="historyTableBody">
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+</body>
+<script src="/scripts/jquery/jquery.min.js"></script>
+<script src="/scripts/popper.js/popper.min.js"></script>
+<script src="/scripts/bootstrap/bootstrap.min.js"></script>
+<script>
+$(document).ready(function(){
+  var host = String(location.host);
+  function retrieveEvents(){
+    $.ajax({
+      type: "GET",
+      dataType: "json",
+      url: "http://"+host+"/getevents",
+      contentType: "application/json; charset=utf-8",
+      success: function(data){
+        $("#historyTableBody").empty();
+        data.events.forEach(function(event){
+          var domElement = "<tr>"
+          +"<td>"+event.date+"</td>"
+          +"<td>"+event.timeofday+"</td>"
+          +"<td>"+event.slotnum.toString()+"</td>"
+          +"<td>"+event.description+"</td>"
+          +"</tr>"
+          $("#historyTableBody").append(domElement);
+        });
+      }
+    });
+  }
+  function retrieveSchedules(){
+    $.ajax({
+      type: "GET",
+      dataType: "json",
+      url: "http://"+host+"/getschedules",
+      contentType: "application/json; charset=utf-8",
+      success: function(data){
+        $("#scheduleTableBody").empty();
+        data.schedules.forEach(function(schedule){
+          var domElement = "<tr>"
+          +"<td>"+schedule.slotnum.toString()+"</td>"
+          +"<td>"+schedule.timeofday+"</td>"
+          +"<td>"+schedule.numofpills.toString()+"</td>"
+          +"<td><button type='submit' class='btn btn-danger btn-remove form-control'>"+"Remove"+"</button></td>"
+          +"</tr>"
+          $("#scheduleTableBody").append(domElement);
+        });
+        $(".btn-remove").click(function(){
+          var siblings = $(this).parent().siblings();
+          $.ajax({
+            type: "post",
+            dataType: "json",
+            data: JSON.stringify({
+              slotnum: siblings[0].innerHTML,
+              timeofday: siblings[1].innerHTML
+            }),
+            url: "http://"+host+"/removeschedule",
+            contentType: "application/json; charset=utf-8",
+            success: function(){
+              retrieveSchedules();
+            }
+          });
+        });
+      }
+    });
+  }
+  function retrieveSetting(){
+    $.ajax({
+      type: "GET",
+      dataType: "json",
+      url: "http://"+host+"/getsetting",
+      contentType: "application/json; charset=utf-8",
+      success: function(data){
+        data.settings.forEach(function(slot){
+          $("input[name="+slot.slotnum+"]").val(slot.weight);
+        });
+      }
+    });
+  }
+  $(".set-btn").click(function(){
+    var slot = $(this).prev("input");
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      data: JSON.stringify({
+        slotnum: $(slot).attr("name"),
+        weight: $(slot).val()
+      }),
+      url: "http://"+host+"/setpillslot",
+      contentType: "application/json; charset=utf-8",
+      success: function(){
+        retrieveSetting();
+      }
+    });
+  });
+  $("#taskInsert").click(function(){
+    $.ajax({
+      type: "post",
+      dataType: "json",
+      data: JSON.stringify({
+        slotnum:$("#slotSelect").val(),
+        timeofday:$("#timeInput").val(),
+        numofpills:$("#pillInput").val()
+      }),
+      url: "http://"+host+"/insertschedule",
+      contentType: "application/json; charset=utf-8",
+      success: retrieveSchedules()
+    });
+  });
+  retrieveEvents();
+  retrieveSchedules();
+  retrieveSetting();
+});
+</script>
+</html>
