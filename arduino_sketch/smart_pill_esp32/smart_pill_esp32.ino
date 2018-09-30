@@ -53,16 +53,13 @@
 #include "HX711.h"
 #include "soc/rtc.h"
 
-const char* ssid     = "HUAWEI-B310-DF6A";//"n3l";
-const char* password = "LH98Y32A9R9";//"nyinyinyanlin";
+const char* ssid     = "suyinwe";
+const char* password = "suyi12435";
 
-const char* host = "192.168.8.100";
+const char* host = "192.168.43.238";
 const char* getSettingUrl = "/getsettinghw";
 const char* getJobsUrl = "/getjobs";
 const char* endJobUrl = "/endjob";
-
-const char* streamId   = "....................";
-const char* privateKey = "....................";
 
 byte pill_register = B00000000;
 byte state_register = B00000000;
@@ -381,7 +378,19 @@ void setup() {
   display.setTextColor(BLACK);
   display.clearDisplay();
   display.setCursor(0, 0);
-  display.println("Wifi > Trying");
+  display.println("Put Bottles");
+  display.println("Blue Btn ->");
+  display.display();
+  while (!getSelectBtn()) {
+    //do nothing
+    Serial.println(getSelectBtn());
+    delay(100);
+  }
+  display.clearDisplay();
+  display.display();
+  display.setCursor(0, 0);
+  display.println("Connecting");
+  display.println("-> Wifi");
   display.display();
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -391,7 +400,6 @@ void setup() {
   }
   display.println("");
   display.println("WiFi - OK");
-  display.println(WiFi.localIP());
   display.display();
   Serial.begin(9600);
   parsePillSetting(pillWeights, makeRequest(host, getSettingUrl, "GET", ""));
@@ -474,20 +482,28 @@ void loop() {
       }
     }
   }
-
+  display.clearDisplay();
+  display.display();
   for (byte i = 1; i <= 3; i++) {
     if (getTaskState(state_register, i)) {
+      display.setCursor(0, 0);
+      display.println("To-Do");
+      display.display();
       byte state = getTaskState(state_register, i);
       if (state > 0) {
         bool flag = false;
+        display.print("Slot " + String(char(i + 48)) + " > ");
         switch (state) {
           case STATE_LIFT_WAIT:
             flag = isTimeout(state_timeout[i - 1], LIFT_WAIT_INTERVAL);
+            display.println(getTaskState(pill_register, i) + 1);
             break;
           case STATE_DOWN_WAIT:
             flag = isTimeout(state_timeout[i - 1], DOWN_WAIT_INTERVAL);
+            display.println("Down");
             break;
           case STATE_FINISH:
+            display.println("Done");
             String params = "?slotnum=";
             params += char(i + 48);
             params += "&status=" + responseStrings[i - 1];
@@ -580,6 +596,7 @@ void loop() {
             }
           }
         }
+        display.display();
       }
     }
   }
